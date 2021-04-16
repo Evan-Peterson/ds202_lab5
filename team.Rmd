@@ -5,6 +5,13 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) 
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(tidyr)
+#library(plotly)
+library(ggrepel)
 ```
 
 ```{r} 
@@ -12,5 +19,99 @@ knitr::opts_chunk$set(echo = TRUE)
 acc <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/accident.csv", stringsAsFactors = FALSE)
 
 per <- read.csv("https://raw.githubusercontent.com/xdaiISU/ds202materials/master/hwlabs/fars2017/person.csv", stringsAsFactors = FALSE)
+
+```
+
+### 1
+```{r}
+
+acc$DAY_WEEK <- wday(acc$DAY_WEEK, label = TRUE)
+
+accidents <- acc %>%
+              group_by(DAY_WEEK) %>%
+              summarise(count = n())
+
+```
+
+```{r}
+
+ggplot(data = accidents, aes(x = DAY_WEEK, y = count)) + geom_bar(stat = 'identity')
+
+```
+
+
+### 2
+```{r}
+
+fatal <- filter(per, INJ_SEV == 4)
+head(fatal)
+
+```
+
+### 3
+```{r}
+
+temp <- fatal %>%
+          group_by(STATE, MAKE) %>%
+          summarize(n = n())
+
+head(temp)
+
+```
+
+```{r}
+
+mostDangerous <- temp %>%
+                  na.omit() %>%
+                  group_by(STATE) %>%
+                  filter(n == max(n))
+head(mostDangerous)
+
+```
+
+
+
+### 4
+```{r}
+
+glc <- readxl::read_xlsx('GLC.xlsx')
+
+glc$'State Code' <- as.numeric(glc$'State Code')
+
+```
+
+```{r}
+
+data <- left_join(mostDangerous, glc, by = c("STATE" = "State Code")) %>%
+  select(STATE, MAKE, n, 'State Name') %>%
+  distinct()
+
+```
+
+```{r} 
+
+state <- map_data("state")
+
+stateMap <- state %>%
+  group_by(region) %>%
+  summarize(long = mean(long), lat = mean(lat))
+
+stateMap$region <- toupper(stateMap$region)
+
+stateMapData <- data %>%
+  left_join(stateMap, by = c("State Name" = "region")) %>%
+  select(STATE, MAKE, n, 'State Name', long, lat) %>%
+  distinct()
+
+#ggplot(state, aes(x='long',y='lat')) + geom_polygon(aes(group=group)) + geom_text(data = stateMap, aes(label=MAKE))
+
+```
+
+
+```{r}
+#sMap <- state %>%
+  #ggplot(aes(x = long, y = lat)) + geom_polygon(aes(group = group), color = 'white') + coord_map() + geom_label_repel(data = stateMapData, aes(label = MAKE), size = 2, max.overlaps = Inf)
+
+ggplot(data = state, aes(x = long, y = lat)) + geom_polygon(aes(group = group), color = 'white') + geom_label_repel(data = stateMapData, aes(label = MAKE), size = 2, max.overlaps = Inf)
 
 ```
