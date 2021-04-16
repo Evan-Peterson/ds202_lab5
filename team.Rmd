@@ -78,6 +78,8 @@ glc <- readxl::read_xlsx('GLC.xlsx')
 
 glc$'State Code' <- as.numeric(glc$'State Code')
 
+glc
+
 ```
 
 ```{r}
@@ -113,5 +115,33 @@ stateMapData <- data %>%
   #ggplot(aes(x = long, y = lat)) + geom_polygon(aes(group = group), color = 'white') + coord_map() + geom_label_repel(data = stateMapData, aes(label = MAKE), size = 2, max.overlaps = Inf)
 
 ggplot(data = state, aes(x = long, y = lat)) + geom_polygon(aes(group = group), color = 'white') + geom_label_repel(data = stateMapData, aes(label = MAKE), size = 2, max.overlaps = Inf)
+```
 
+### 5
+```{r}
+accidents <- inner_join(acc, per, by=c('STATE', 'ST_CASE', 'VE_FORMS', 'COUNTY', 'DAY', 'MONTH', 'HOUR', 'MINUTE', 'RUR_URB', 'FUNC_SYS', 'HARM_EV', 'MAN_COLL', 'SCH_BUS'))
+head(accidents)
+```
+
+### 6
+```{r}
+#accidents %>% filter(INJ_SEV == 4) %>% table(DAY_WEEK)
+#ggplot(fatal, aes(x= ,y=)) + geom_boxplot()
+table(fatal$HOUR)
+fatal %>% slice(1:24) %>% ggplot(aes(x=HOUR)) + geom_bar()
+table(fatal$SEX)
+fatal %>% filter(SEX==c(1,2))  %>% ggplot(aes(x=SEX)) + geom_bar()
+```
+
+### 7
+```{r}
+accidents %>% filter(INJ_SEV==4) %>% ggplot() + geom_polygon(aes(fill=INJ_SEV ,x=LONGITUDE, y=LATITUDE, group=COUNTY))
+```
+
+### 8
+```{r}
+winter <- accidents %>% filter(MONTH==c(12,1,2))
+summer <- accidents %>% filter(MONTH==c(6,7,8))
+winter %>% table(INJ_SEV)
+summer %>% table(INJ_SEV)
 ```
