@@ -39,6 +39,8 @@ ggplot(data = accidents, aes(x = DAY_WEEK, y = count)) + geom_bar(stat = 'identi
 
 ```
 
+The day with the most accidents is Saturday.
+
 
 ### 2
 ```{r}
@@ -120,28 +122,34 @@ ggplot(data = state, aes(x = long, y = lat)) + geom_polygon(aes(group = group), 
 ### 5
 ```{r}
 accidents <- inner_join(acc, per, by=c('STATE', 'ST_CASE', 'VE_FORMS', 'COUNTY', 'DAY', 'MONTH', 'HOUR', 'MINUTE', 'RUR_URB', 'FUNC_SYS', 'HARM_EV', 'MAN_COLL', 'SCH_BUS'))
-head(accidents)
 ```
 
 ### 6
 ```{r}
-#accidents %>% filter(INJ_SEV == 4) %>% table(DAY_WEEK)
-#ggplot(fatal, aes(x= ,y=)) + geom_boxplot()
-table(fatal$HOUR)
-fatal %>% slice(1:24) %>% ggplot(aes(x=HOUR)) + geom_bar()
-table(fatal$SEX)
-fatal %>% filter(SEX==c(1,2))  %>% ggplot(aes(x=SEX)) + geom_bar()
+table(accidents$DAY_WEEK)
+accidents %>% ggplot(aes(x=DAY_WEEK)) + geom_bar()
+table(accidents$HOUR)
+accidents %>% slice(1:24) %>% ggplot(aes(x=HOUR)) + geom_bar()
+table(accidents$SEX)
+accidents %>% filter(SEX==c(1,2))  %>% ggplot(aes(x=SEX)) + geom_bar()
 ```
 
 ### 7
 ```{r}
-accidents %>% filter(INJ_SEV==4) %>% ggplot() + geom_polygon(aes(fill=INJ_SEV ,x=LONGITUDE, y=LATITUDE, group=COUNTY))
+#stateMap %>% ggplot(aes(x=LONGITUDE, y=LATITUDE, fill=(INJ_SEV==4))) + geom_polygon(aes(group= group))
 ```
 
 ### 8
 ```{r}
 winter <- accidents %>% filter(MONTH==c(12,1,2))
 summer <- accidents %>% filter(MONTH==c(6,7,8))
-winter %>% table(INJ_SEV)
-summer %>% table(INJ_SEV)
+winter %>% ggplot(aes(x=MONTH, weight=(INJ_SEV==4))) + geom_bar()
+summer %>% ggplot(aes(x=MONTH, weight=(INJ_SEV==4))) + geom_bar()
+winter %>% filter(STATE==4) %>% ggplot(aes(x=MONTH, weight=(INJ_SEV==4))) + geom_bar()
+summer %>% filter(STATE==4) %>% ggplot(aes(x=MONTH, weight=(INJ_SEV==4))) + geom_bar()
+winter %>% filter(STATE==25) %>% ggplot(aes(x=MONTH, weight=(INJ_SEV==4))) + geom_bar()
+summer %>% filter(STATE==25) %>% ggplot(aes(x=MONTH, weight=(INJ_SEV==4))) + geom_bar()
 ```
+
+
+There are more accidents in the summer than the winter. We also chose to look at Arizona and Massachusetts because they have similar populations and different weather. Arizona has more accidents in the winter and the summer.
